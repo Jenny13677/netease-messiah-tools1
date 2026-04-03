@@ -1,6 +1,8 @@
 use clap::Parser;
 use std::{fmt::Debug, io::Read};
 use tracing::{error, info};
+use rustpython_vm::Interpreter;
+use rustpython_pylib::FROZEN_STDLIB;
 
 const STACK_SIZE: usize = 4 * 1024 * 1024;
 
@@ -37,7 +39,7 @@ fn run() -> anyhow::Result<()> {
     std::include_str!("../scripts/modules/pymarshal_remap.py");
 
     let interp = rustpython::InterpreterConfig::new()
-        .init_stdlib()
+        .init_frozen_stdlib()
         .init_hook(Box::new(|vm| {
             vm.add_native_modules(rustpython_stdlib::get_module_inits());
             vm.add_frozen(rustpython_vm::py_freeze!(dir = "scripts/modules"));
