@@ -3,8 +3,6 @@ name = "messiah-pyc"
 version = "0.1.0"
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
 clap = { version = "4.5.23", features = ["derive"] }
 log = "0.4"
@@ -13,18 +11,17 @@ anyhow = { version = "1", features = ["backtrace"] }
 indicatif = "0.17"
 walkdir = "2"
 glob = "0.3.1"
-
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = [
     "std",
     "env-filter",
     "tracing-log",
 ] }
-
-rustpython = "0.4.0"
+rustpython = { version = "0.4.0", features = ["stdlib", "freeze-stdlib"] }
 rustpython-vm = { version = "0.4", features = [
     "freeze-stdlib",
     "rustpython-compiler",
     "jit",
 ] }
 rustpython-stdlib = { version = "0.4" }
+rustpython-pylib = { version = "0.4" }
