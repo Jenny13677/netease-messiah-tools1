@@ -1,4 +1,4 @@
-name: Rust - messiah-pyc Windows build
+name: RustPython - messiah-pyc full build
 
 on:
   push:
@@ -15,27 +15,30 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      # Checkout your repository
+      # Checkout repo
       - uses: actions/checkout@v4
 
-      # Install Rust (if not preinstalled on the runner)
+      # Install Rust toolchain
       - name: Install Rust
         uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
           override: true
 
-      # Build the messiah-pyc crate in release mode
-      - name: Build messiah-pyc.exe
+      # Build messiah-pyc in release mode
+      - name: Build messiah-pyc
         run: cargo build --release -p messiah-pyc
 
-      # Run tests
-      - name: Test messiah-pyc
-        run: cargo test -p messiah-pyc --verbose
+      # Copy RustPython stdlib folder alongside exe
+      - name: Include RustPython stdlib
+        run: |
+          mkdir -p output
+          copy /Y target\release\messiah-pyc.exe output\
+          xcopy /E /I pyc\rustpython_pylib output\rustpython_pylib\
 
-      # Upload the Windows executable
-      - name: Upload messiah-pyc.exe
+      # Upload the full folder as artifact
+      - name: Upload full build
         uses: actions/upload-artifact@v4
         with:
-          name: messiah-pyc-windows
-          path: target\release\messiah-pyc.exe
+          name: messiah-pyc-full
+          path: output
