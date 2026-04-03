@@ -41,7 +41,7 @@ fn run() -> anyhow::Result<()> {
     .init_stdlib()
     .init_hook(Box::new(|vm| {
         // Attach embedded Python standard library
-        vm.add_frozen(rustpython_vm::py_freeze!(stdlib));
+        vm.add_frozen(rustpython_vm::py_freeze!(dir = "stdlib"));
 
         // Register builtin/native modules
         vm.add_native_modules(rustpython_stdlib::get_module_inits());
