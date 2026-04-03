@@ -1,9 +1,7 @@
-name: RustPython - messiah-pyc full build
+name: Build messiah-pyc
 
 on:
   push:
-    branches: ["main"]
-  pull_request:
     branches: ["main"]
 
 env:
@@ -11,34 +9,25 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
-  build-windows:
+  build:
     runs-on: windows-latest
 
     steps:
-      # Checkout repo
       - uses: actions/checkout@v4
 
-      # Install Rust toolchain
-      - name: Install Rust
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          override: true
-
-      # Build messiah-pyc in release mode
       - name: Build messiah-pyc
         run: cargo build --release -p messiah-pyc
 
-      # Copy RustPython stdlib folder alongside exe
-      - name: Include RustPython stdlib
+      - name: Prepare output folder
         run: |
-          mkdir -p output
-          copy /Y target\release\messiah-pyc.exe output\
-          xcopy /E /I pyc\rustpython_pylib output\rustpython_pylib\
+          New-Item -ItemType Directory -Force -Path output
+          Copy-Item target\release\messiah-pyc.exe output\
+          if (Test-Path pyc\rustpython_pylib) {
+            Copy-Item -Recurse pyc\rustpython_pylib output\rustpython_pylib
+          }
 
-      # Upload the full folder as artifact
-      - name: Upload full build
+      - name: Upload build
         uses: actions/upload-artifact@v4
         with:
-          name: messiah-pyc-full
+          name: messiah-pyc
           path: output
