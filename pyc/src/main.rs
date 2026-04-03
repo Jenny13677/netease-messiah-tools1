@@ -2,7 +2,6 @@ use clap::Parser;
 use std::{fmt::Debug, io::Read};
 use tracing::{error, info};
 use rustpython_vm::Interpreter;
-use rustpython_pylib::FROZEN_STDLIB;
 
 const STACK_SIZE: usize = 4 * 1024 * 1024;
 
@@ -39,12 +38,19 @@ fn run() -> anyhow::Result<()> {
     std::include_str!("../scripts/modules/pymarshal_remap.py");
 
     let interp = rustpython::InterpreterConfig::new()
-        .init_frozen_stdlib()
-        .init_hook(Box::new(|vm| {
-            vm.add_native_modules(rustpython_stdlib::get_module_inits());
-            vm.add_frozen(rustpython_vm::py_freeze!(dir = "scripts/modules"));
-        }))
-        .interpreter();
+    .init_stdlib()
+    .init_hook(Box::new(|vm| {
+        // Register embedded stdlib (THIS is the missing part)
+        vm.add_frozen(rustpython_stdlib::get_frozen_stdlib());
+
+        // Your existing modules
+        vm.add_native_modules(rustpython_stdlib::get_module_inits());
+
+        vm.add_frozen(
+            rustpython_vm::py_freeze!(dir = "scripts/modules")
+        );
+    }))
+    .interpreter();
 
     interp.enter(|vm| {
         let scope = vm.new_scope_with_builtins();
