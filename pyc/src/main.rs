@@ -38,15 +38,15 @@ fn run() -> anyhow::Result<()> {
     std::include_str!("../scripts/modules/pymarshal_remap.py");
 
     let interp = rustpython::InterpreterConfig::new()
-    .init_stdlib()  // <-- this already handles stdlib
+    .init_stdlib()
     .init_hook(Box::new(|vm| {
-        // REMOVE this line - init_stdlib() above already covers it:
-        // vm.add_frozen(rustpython_vm::py_freeze!(dir = "stdlib"));
+        // Explicitly freeze the stdlib into the binary
+        vm.add_frozen(rustpython_pylib::FROZEN_STDLIB);
 
-        // Keep your native modules:
+        // Native modules
         vm.add_native_modules(rustpython_stdlib::get_module_inits());
 
-        // Keep your embedded scripts:
+        // Your embedded scripts
         vm.add_frozen(
             rustpython_vm::py_freeze!(dir = "scripts/modules")
         );
