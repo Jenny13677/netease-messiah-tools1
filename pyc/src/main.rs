@@ -40,12 +40,13 @@ fn run() -> anyhow::Result<()> {
     let interp = rustpython::InterpreterConfig::new()
     .init_stdlib()
     .init_hook(Box::new(|vm| {
-        // Register embedded stdlib (THIS is the missing part)
-        vm.add_frozen(rustpython_stdlib::get_frozen_stdlib());
+        // Attach embedded Python standard library
+        vm.add_frozen(rustpython_vm::py_freeze!(stdlib));
 
-        // Your existing modules
+        // Register builtin/native modules
         vm.add_native_modules(rustpython_stdlib::get_module_inits());
 
+        // Your embedded scripts
         vm.add_frozen(
             rustpython_vm::py_freeze!(dir = "scripts/modules")
         );
