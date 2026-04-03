@@ -1,4 +1,4 @@
-name: Rust - pyc build
+name: Rust - messiah-pyc Windows build
 
 on:
   push:
@@ -11,24 +11,31 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  build-windows:
+    runs-on: windows-latest
 
     steps:
-      # Checkout your repo
+      # Checkout your repository
       - uses: actions/checkout@v4
 
-      # Build only the pyc workspace member in release mode
-      - name: Build messiah-pyc
+      # Install Rust (if not preinstalled on the runner)
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+
+      # Build the messiah-pyc crate in release mode
+      - name: Build messiah-pyc.exe
         run: cargo build --release -p messiah-pyc
 
-      # Run tests for this member only
+      # Run tests
       - name: Test messiah-pyc
         run: cargo test -p messiah-pyc --verbose
 
-      # Upload the binary artifact
-      - name: Upload messiah-pyc binary
+      # Upload the Windows executable
+      - name: Upload messiah-pyc.exe
         uses: actions/upload-artifact@v4
         with:
-          name: messiah-pyc
-          path: target/release/messiah-pyc
+          name: messiah-pyc-windows
+          path: target\release\messiah-pyc.exe
